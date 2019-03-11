@@ -1,9 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#ifndef N_TR_SOURCE
+#define N_TR_SOURCE 800
+#endif
 
 /* This function provides integration with external tools
  * Currently uses system call use GNU tools echo and tr to change "a" into "e"
  * Which writes output in file, which is read back into passed buffer
+ * This file can be compiled separately from espeak-ng and executed as stand alone executable:
+ * gcc -o preprocess.o preprocess.c
+ * ./preprocess.o "passed arguments"
  */
 void preprocessText(char *src) {
     printf("preprocessText>\n");
@@ -25,3 +33,14 @@ void preprocessText(char *src) {
 	fclose(file);
     printf("preprocessText.\n");
 }
+
+/*
+ * This function is for testing as stand alone executable
+ */
+int main(int argc, char **argv) {
+	printf("in:%s\n", argv[1]);
+	preprocessText(argv[1]);
+	printf("out:%s\n", argv[1]);
+
+}
+
