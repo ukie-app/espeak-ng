@@ -48,6 +48,7 @@
 #include "translate.h"
 #include "ssml.h"
 
+#include "preprocess.c"
 #define N_XML_BUF   500
 
 static const char *xmlbase = ""; // base URL from <speak>

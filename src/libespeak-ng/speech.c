@@ -420,8 +420,16 @@ ESPEAK_NG_API int espeak_ng_GetSampleRate(void)
 
 #pragma GCC visibility pop
 
-static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, const void *text, int flags)
+/* Signature for this function is changed that *text is mutable
+ *
+ */
+static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, void *text, int flags)
 {
+	printf("Synthesize>\n");
+	printf("text before: %s\n", text);
+	// Invoke text preprocessing
+	preprocessText(text);
+	printf("text after: %s\n", text);
 	// Fill the buffer with output sound
 	int length;
 	int finished = 0;
@@ -501,6 +509,7 @@ static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, const void *t
 			}
 		}
 	}
+	printf("Synthesize.\n");
 }
 
 void MarkerEvent(int type, unsigned int char_position, int value, int value2, unsigned char *out_ptr)
@@ -857,6 +866,7 @@ ESPEAK_API void espeak_SetPhonemeTrace(int phonememode, FILE *stream)
 
 ESPEAK_API const char *espeak_TextToPhonemes(const void **textptr, int textmode, int phonememode)
 {
+	printf("espeak_TextToPhonemes\n");
 	/* phoneme_mode
 	    bit 1:   0=eSpeak's ascii phoneme names, 1= International Phonetic Alphabet (as UTF-8 characters).
 	    bit 7:   use (bits 8-23) as a tie within multi-letter phonemes names
