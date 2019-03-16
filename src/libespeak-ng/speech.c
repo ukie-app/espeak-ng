@@ -425,11 +425,10 @@ ESPEAK_NG_API int espeak_ng_GetSampleRate(void)
  */
 static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, void *text, int flags)
 {
-	printf("Synthesize>\n");
-	printf("text before: %s\n", text);
-	// Invoke text preprocessing
-	preprocessText(text);
-	printf("text after: %s\n", text);
+	// Do pre-proceesing only for Arabic language
+	if (strcmp(translator->dictionary_name, "ar") == 0)
+		preprocessText(text);
+
 	// Fill the buffer with output sound
 	int length;
 	int finished = 0;
