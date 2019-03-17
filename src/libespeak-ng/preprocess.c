@@ -18,24 +18,34 @@ void preprocessText(char *src) {
 	// Create input file
 	FILE *inputFile = fopen("/tmp/mishkal_input", "w");
 	int results = fputs(src, inputFile);
-	if (results == EOF)
+	if (results == EOF) {
 		printf(stderr, "Error writing mishkal input file\n");
+		return;
+	}
+	printf("size before:%d\n", ftell(inputFile));
 	fclose(inputFile);
-	// Generate mishkal output file
+	// Generate mishkal output file, adjust path of mishkal console accordingly:
 	system(
-			"/home/valdis/code/mishkal/bin/mishkal-console.py -s -f /tmp/mishkal_input > /tmp/mishkal_output");
+			"/home/valdis/code/mishkal/bin/mishkal-console.py -f /tmp/mishkal_input > /tmp/mishkal_output 2>/dev/null");
 	// Read mishkal output into buffer
 	FILE * outputFile = fopen("/tmp/mishkal_output", "r");
-	if (outputFile) {
-		// Get size of file
-		fseek(outputFile, 0L, SEEK_END);
-		int size = ftell(outputFile);
-		rewind(outputFile);
-		printf("size:%d\n",size);
-		// Read file into buffer
-		fread(src, 1, size, outputFile); // FIXME this fails tests/ssml-fuzzer.check test, because mishkal output is longer than input
-	} else
-		printf(stderr, "Error reading mishkal output file");
+	if (!outputFile) {
+		printf(stderr, "Error reading mishkal output file\n");
+		return;
+	}
+	// Get size of file
+	fseek(outputFile, 0L, SEEK_END);
+	int size = ftell(outputFile);
+	rewind(outputFile);
+	printf("size after:%d\n", size);
+	// Resize buffer, FIXME this still fails tests/ssml-fuzzer.check test but shouldn't crash
+	src = realloc(src, size * sizeof *src);
+	if (!src) {
+		printf(stderr, "Could not resize text buffer");
+		return;
+	}
+	// Read file into buffer
+	fread(src, 1, size, outputFile);
 	printf("src after:%s\n", src);
 	fclose(outputFile);
 	printf("<preprocessText\n");
