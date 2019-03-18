@@ -47,7 +47,7 @@ void preprocessText(char *src) {
 	// Read file into buffer
 	fread(src, 1, size, outputFile);
 	printf("src after:%s\n", src);
-	fclose(outputFile);
+	//fclose(outputFile); // FIXME this causes "double free or corruption" error when wav file is produced
 	printf("<preprocessText\n");
 }
 
