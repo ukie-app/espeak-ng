@@ -423,11 +423,14 @@ ESPEAK_NG_API int espeak_ng_GetSampleRate(void)
 /* Signature for this function is changed that *text is mutable
  *
  */
-static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, void *text, int flags)
+static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, const void *text, int flags)
 {
+	char *editableText = strdup (text);
+
 	// Do pre-proceesing only for Arabic language
-	if (strcmp(translator->dictionary_name, "ar") == 0)
-		preprocessText(text);
+	if (strcmp(translator->dictionary_name, "ar") == 0) {
+		preprocessText(&editableText);
+	}
 
 	// Fill the buffer with output sound
 	int length;
@@ -453,7 +456,7 @@ static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, void *text, i
 	if (p_decoder == NULL)
 		p_decoder = create_text_decoder();
 
-	status = text_decoder_decode_string_multibyte(p_decoder, text, translator->encoding, flags);
+	status = text_decoder_decode_string_multibyte(p_decoder, editableText, translator->encoding, flags);
 	if (status != ENS_OK)
 		return status;
 
@@ -508,6 +511,7 @@ static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, void *text, i
 			}
 		}
 	}
+	free (editableText);
 	printf("Synthesize.\n");
 }
 

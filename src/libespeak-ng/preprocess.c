@@ -12,12 +12,12 @@
  * and then executed as stand alone executable with
  * ./preprocess.o "passed arguments"
  */
-void preprocessText(char *src) {
+void preprocessText(char **src) {
 	printf(">preprocessText\n");
-	printf("src before:%s\n", src);
+	printf("src before:%s\n", *src);
 	// Create input file
 	FILE *inputFile = fopen("/tmp/mishkal_input", "w");
-	int results = fputs(src, inputFile);
+	int results = fputs(*src, inputFile);
 	if (results == EOF) {
 		printf(stderr, "Error writing mishkal input file\n");
 		return;
@@ -39,15 +39,15 @@ void preprocessText(char *src) {
 	rewind(outputFile);
 	printf("size after:%d\n", size);
 	// Resize buffer, FIXME this still fails tests/ssml-fuzzer.check test but shouldn't crash
-	src = realloc(src, size * sizeof *src);
-	if (!src) {
+	*src = realloc(*src, size);
+	if (!*src) {
 		printf(stderr, "Could not resize text buffer");
 		return;
 	}
 	// Read file into buffer
-	fread(src, 1, size, outputFile);
-	printf("src after:%s\n", src);
-	//fclose(outputFile); // FIXME this causes "double free or corruption" error when wav file is produced
+	fread(*src, 1, size, outputFile);
+	printf("src after:%s\n", *src);
+	fclose(outputFile);
 	printf("<preprocessText\n");
 }
 
