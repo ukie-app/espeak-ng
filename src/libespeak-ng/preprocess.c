@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 	if (argc > 1)
 		strcpy(data, argv[1]);
 	printf("data before:%s\n",data);
-	processData(&dataref);
+	preprocessText(&dataref);
 	printf("data  after:%s\n", data);
 }
 #endif
