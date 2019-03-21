@@ -9,7 +9,7 @@
 #define HOSTNAME "localhost"
 #define ERROR -1
 
-#define BUFFERSIZE 1024 // max size of buffer
+#define BUFFERSIZE 256 // max size of buffer
 
 
 /*- This function provides integration with external tools
