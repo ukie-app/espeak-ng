@@ -429,7 +429,9 @@ static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, const void *t
 
 	// Do pre-proceesing only for Arabic language
 	if (strcmp(translator->dictionary_name, "ar") == 0) {
+		printf(">Synthesize\n>editableText:%s\n", editableText);
 		preprocessText(&editableText);
+		printf("<editableText:%s\n", editableText);
 	}
 
 	// Fill the buffer with output sound
@@ -512,7 +514,8 @@ static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, const void *t
 		}
 	}
 	free (editableText);
-	printf("Synthesize.\n");
+	if (strcmp(translator->dictionary_name, "ar") == 0)
+		printf("<Synthesize.\n");
 }
 
 void MarkerEvent(int type, unsigned int char_position, int value, int value2, unsigned char *out_ptr)

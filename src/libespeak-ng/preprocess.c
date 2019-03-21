@@ -1,6 +1,16 @@
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+#define PORT 6135    // the port client will be connecting to
+#define HOSTNAME "localhost"
+#define ERROR -1
+
+#define BUFFERSIZE 1024 // max size of buffer
+
 
 /*- This function provides integration with external tools
  * Currently uses system call use GNU tools echo and tr to change "a" into "e"
@@ -12,42 +22,68 @@
  * and then executed as stand alone executable with
  * ./preprocess.o "passed arguments"
  */
-void preprocessText(char **src) {
+void preprocessText(char **data) {
 	printf(">preprocessText\n");
-	printf("src before:%s\n", *src);
-	// Create input file
-	FILE *inputFile = fopen("/tmp/mishkal_input", "w");
-	int results = fputs(*src, inputFile);
-	if (results == EOF) {
-		printf(stderr, "Error writing mishkal input file\n");
+	printf("data:%s\n", *data);
+	int sockfd;
+
+	struct hostent *he;
+	struct sockaddr_in sockedAddr; // connector's address information
+	char hostname[50] = HOSTNAME;
+
+	if ((he = gethostbyname(hostname)) == NULL) { // get the host info
+		herror("gethostbyname");
 		return;
 	}
-	printf("size before:%d\n", ftell(inputFile));
-	fclose(inputFile);
-	// Generate mishkal output file, adjust path of mishkal console accordingly:
-	system(
-			"/home/valdis/code/mishkal/bin/mishkal-console.py -f /tmp/mishkal_input > /tmp/mishkal_output 2>/dev/null");
-	// Read mishkal output into buffer
-	FILE * outputFile = fopen("/tmp/mishkal_output", "r");
-	if (!outputFile) {
-		printf(stderr, "Error reading mishkal output file\n");
+
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+		perror("socket");
 		return;
 	}
-	// Get size of file
-	fseek(outputFile, 0L, SEEK_END);
-	int size = ftell(outputFile);
-	rewind(outputFile);
-	printf("size after:%d\n", size);
-	// Resize buffer, FIXME this still fails tests/ssml-fuzzer.check test but shouldn't crash
-	*src = realloc(*src, size);
-	if (!*src) {
-		printf(stderr, "Could not resize text buffer");
+
+	sockedAddr.sin_family = AF_INET; // host byte order
+	sockedAddr.sin_port = htons(PORT); // short, network byte order
+	sockedAddr.sin_addr = *((struct in_addr *) he->h_addr);
+	bzero(&(sockedAddr.sin_zero), 8); // zero the rest of the struct
+
+	if (connect(sockfd, (struct sockaddr *) &sockedAddr,
+			sizeof(struct sockaddr)) == -1) {
+		perror("connect");
 		return;
 	}
-	// Read file into buffer
-	fread(*src, 1, size, outputFile);
-	printf("src after:%s\n", *src);
-	fclose(outputFile);
+
+	char bufSend[BUFFERSIZE + 1] = { 0 }; // reserve last byte for null terminator (for debugging purposes)
+	int sentPacketBytes;
+	int sentBytes = 0;
+	do {
+		//memset(bufSend, 0, sizeof(bufSend));
+		strncpy(bufSend, (*data) + sentBytes, BUFFERSIZE); // copy part of data into send buffer
+		printf("bufSend:%s\n", bufSend);
+		sentPacketBytes = send(sockfd, bufSend, BUFFERSIZE, 0);
+		if (sentPacketBytes == ERROR) {
+			perror("send() error");
+			return;
+		}
+		printf("sentBytes:%d bufSend:%s\n", sentBytes, bufSend);
+		sentBytes += sentPacketBytes;
+	} while (bufSend[BUFFERSIZE - 1] > 0);
+	printf("%d bytes sent\n", sentBytes);
+
+	char bufRecieve[BUFFERSIZE + 1] = { 0 };
+	int recvPacketBytes;
+	int recvBytes = 0;
+	do {
+		recvPacketBytes = recv(sockfd, bufRecieve, BUFFERSIZE, 0);
+		if (recvPacketBytes == ERROR) {
+			perror("receive() error");
+			return;
+		}
+		strncpy((*data) + recvBytes, &bufRecieve[0], recvPacketBytes); // copy data from received buffer to data buffer
+		recvBytes += recvPacketBytes;
+	} while (bufRecieve[BUFFERSIZE - 1] > 0);
+	printf("%d bytes received\n", recvBytes);
+	close(sockfd);
+	printf("data:%s\n", *data);
 	printf("<preprocessText\n");
 }
 
@@ -56,11 +92,13 @@ void preprocessText(char **src) {
  */
 #ifdef STANDALONE
 int main(int argc, char **argv) {
-	for(int i=1; i<argc; i++) {
-		printf("in %d:%s\n", i, argv[i]);
-		preprocessText(argv[i]);
-		printf("out %d:%s\n", i, argv[i]);
-	}
+	char data[1024] = { 0 };
+	char *dataref = &data[0];
+	if (argc > 1)
+		strcpy(data, argv[1]);
+	printf("data before:%s\n",data);
+	processData(&dataref);
+	printf("data  after:%s\n", data);
 }
 #endif
 
