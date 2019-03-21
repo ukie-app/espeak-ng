@@ -425,7 +425,8 @@ ESPEAK_NG_API int espeak_ng_GetSampleRate(void)
  */
 static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, const void *text, int flags)
 {
-	char *editableText = strdup (text);
+	char *editableText = malloc(strlen(text) * 2);
+	strncpy(editableText, text, strlen(text));
 
 	// Do pre-proceesing only for Arabic language
 	if (strcmp(translator->dictionary_name, "ar") == 0) {
