@@ -5,7 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define PORT 6135    // the port client will be connecting to
+#define PORT 6123    // the port client will be connecting to
 #define HOSTNAME "localhost"
 #define ERROR -1
 
