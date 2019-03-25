@@ -429,11 +429,8 @@ static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, const void *t
 	strcpy(editableText, text);
 
 	// Do pre-proceesing only for Arabic language
-	if (strcmp(translator->dictionary_name, "ar") == 0) {
-		printf(">Synthesize\n>editableText:%s\n", editableText);
+	if (strcmp(translator->dictionary_name, "ar") == 0)
 		preprocessText(&editableText);
-		printf("<editableText:%s\n", editableText);
-	}
 
 	// Fill the buffer with output sound
 	int length;
@@ -514,8 +511,6 @@ static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, const void *t
 			}
 		}
 	}
-	if (strcmp(translator->dictionary_name, "ar") == 0)
-		printf("<Synthesize.\n");
 }
 
 void MarkerEvent(int type, unsigned int char_position, int value, int value2, unsigned char *out_ptr)
@@ -872,7 +867,6 @@ ESPEAK_API void espeak_SetPhonemeTrace(int phonememode, FILE *stream)
 
 ESPEAK_API const char *espeak_TextToPhonemes(const void **textptr, int textmode, int phonememode)
 {
-	printf("espeak_TextToPhonemes\n");
 	/* phoneme_mode
 	    bit 1:   0=eSpeak's ascii phoneme names, 1= International Phonetic Alphabet (as UTF-8 characters).
 	    bit 7:   use (bits 8-23) as a tie within multi-letter phonemes names

@@ -23,8 +23,6 @@
  * ./preprocess.o "passed arguments"
  */
 void preprocessText(char **data) {
-	printf(">preprocessText\n");
-	printf("data:%s\n", *data);
 	int sockfd;
 
 	struct hostent *he;
@@ -57,16 +55,13 @@ void preprocessText(char **data) {
 	int sentBytes = 0;
 	do {
 		strncpy(bufSend, (*data) + sentBytes, BUFFERSIZE); // copy part of data into send buffer
-		printf("bufSend:%s\n", bufSend);
 		sentPacketBytes = send(sockfd, bufSend, BUFFERSIZE, 0);
 		if (sentPacketBytes == ERROR) {
 			perror("send() error");
 			return;
 		}
-		printf("sentBytes:%d bufSend:%s\n", sentBytes, bufSend);
 		sentBytes += sentPacketBytes;
 	} while (strlen(bufSend) == BUFFERSIZE); // send data while string is not ended inside buffer
-	printf("%d bytes sent\n", sentBytes);
 
 	char bufRecieve[BUFFERSIZE + 1] = { 0 };
 	int recvPacketBytes;
@@ -80,10 +75,7 @@ void preprocessText(char **data) {
 		strncpy((*data) + recvBytes, &bufRecieve[0], recvPacketBytes); // copy data from received buffer to data buffer
 		recvBytes += recvPacketBytes;
 	} while (strlen(bufRecieve) == BUFFERSIZE); // receive data while string is not ended inside buffer
-	printf("%d bytes received\n", recvBytes);
 	close(sockfd);
-	printf("data:%s\n", *data);
-	printf("<preprocessText\n");
 }
 
 /*
