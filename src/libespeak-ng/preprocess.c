@@ -55,7 +55,10 @@ void preprocessText(char **data) {
 	int sentBytes = 0;
 	do {
 		strncpy(bufSend, (*data) + sentBytes, BUFFERSIZE); // copy part of data into send buffer
-		sentPacketBytes = send(sockfd, bufSend, BUFFERSIZE, 0);
+		int packetSize = strlen(bufSend) + 1;
+		if (packetSize > BUFFERSIZE)
+			packetSize = BUFFERSIZE;
+		sentPacketBytes = send(sockfd, bufSend, packetSize, 0);
 		if (sentPacketBytes == ERROR) {
 			perror("send() error");
 			return;
