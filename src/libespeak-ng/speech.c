@@ -514,7 +514,6 @@ static espeak_ng_STATUS Synthesize(unsigned int unique_identifier, const void *t
 			}
 		}
 	}
-	free (editableText);
 	if (strcmp(translator->dictionary_name, "ar") == 0)
 		printf("<Synthesize.\n");
 }
