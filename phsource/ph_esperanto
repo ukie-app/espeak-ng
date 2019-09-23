@@ -7,7 +7,7 @@
 phoneme a
   vwl starttype #a endtype #a
   length 180
-  FMT(vowel/a_2)
+  FMT(vowel/aa_2)
 endphoneme
 
 
